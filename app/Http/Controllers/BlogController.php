@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
+use App\Http\Resources\PostRecource;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,10 @@ class BlogController extends Controller
         //     ->header('test', 'test value');
         // ->setStatusCode(201);
 
-        $posts = Post::all();
+        // $posts = Post::all();
+
+        $posts = PostRecource::collection(Post::with('author'))->paginate();
+        return $posts;
         return response()->json(['message' => 'Blog posts retrieved successfully!', 'status' => 'success', "data" => $posts], 200);
     }
 
@@ -37,13 +41,11 @@ class BlogController extends Controller
         $data = $request->only(['title', "body"]);
         $data['author_id'] = 1; // set the author_id to 1 for now
 
-        return $data;
-
         $crateData = Post::create($data);
         return response()->json([
             'message' => 'Blog post created successfully!',
             'status' => 'success',
-            "data" => $crateData
+            "data" => PostRecource::make($crateData)
         ], 201);
     }
 
